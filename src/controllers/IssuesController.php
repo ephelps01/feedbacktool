@@ -49,7 +49,7 @@ class IssuesController extends Controller
 
         Issue::sendToGitlab($request);
 
-        return redirect('/home');
+        return response('200');
     }
 
     /**
