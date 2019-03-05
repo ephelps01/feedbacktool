@@ -1,0 +1,25 @@
+{
+    "name": "ecd/feedbacktool",
+    "description": "An interface that allows users to submit feedback via an application which creates gitlab issues",
+    "type": "library",
+    "authors": [
+        {
+            "name": "ethan.phelps1",
+            "email": "ethan.phelps@ecdltd.co.uk"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Ecd\\Feedbacktool": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ecd\\Feedbacktool\\FeedbackToolServiceProvider"
+            ]
+        }
+    }
+}
