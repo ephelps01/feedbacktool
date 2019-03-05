@@ -17,7 +17,7 @@ class CreateGitnotesTable extends Migration
             $table->increments('id');
             $table->integer('comment_id');
             $table->integer('issue_id');
-            $table->string('comment')->nullable();
+            $table->longText('comment')->nullable();
             $table->string('developer_name')->nullable();
             $table->timestamps();
         });
