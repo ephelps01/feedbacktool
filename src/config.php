@@ -16,6 +16,6 @@ $accessToken = '';
 $apiUrl = '';
 
 // Project ID
-$projectId = ;
+$projectId = 0;
 
 ?>
