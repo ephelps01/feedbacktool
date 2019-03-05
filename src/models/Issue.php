@@ -27,55 +27,61 @@ class Issue extends Model
         curl_close($ch);
         $issues = json_decode($response, 1);
 
-        foreach ($issues as $issue) {
-            if ($issue == "404 Not Found") {
-                echo "404, Not Found. There May Be a Problem With Your Config File! ";
-            }
-
-            $assignees = '';
-
-            foreach ($issue['assignees'] as $assignee) {
-                $assignees .=$assignee['name'];
-            }
-
-            $labels = implode(",", $issue['labels']);
-            $iid = $issue['iid'];
-
-            Issue::where('issue_id', $iid)->update([
-                'title' => $issue['title'],
-                'description' => $issue['description'],
-                'labels' => $labels,
-                'user_notes_count' => $issue['user_notes_count'],
-                'assignee' => $assignees,
-                'state' => $issue['state']
-            ]);
-
-            $notesCh = curl_init($apiUrl.$projectId.'/issues/'.$iid.'/notes');
-            curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
-            $notesResponse = curl_exec($notesCh);
-            curl_close($notesCh);
-            $issueNotes = json_decode($notesResponse, 1);
-
-
-            foreach ($issueNotes as $note) {
-                if ($note == "404 Not Found") {
-                    dump("No notes found for issue ".$iid);
+        if ($issues == null) {
+            echo "Oops! Have You Setup Your 'config.php' Correctly? ";
+            die();
+        } else {
+            foreach ($issues as $issue) {
+                if ($issue == "404 Not Found") {
+                    echo "404, Not Found. There May Be a Problem With Your Config File! ";
+                    die();
                 } else {
-                    $comment_id = $note['id'];
-                    $comment = $note['body'];
-                    $developer_name = $note['author'];
+                    $assignees = '';
 
-                    $gitnote = Gitnote::updateOrCreate(
-                        ['comment_id' => $comment_id],
+                    foreach ($issue['assignees'] as $assignee) {
+                        $assignees .=$assignee['name'];
+                    }
 
-                        [
-                            'comment_id' => $comment_id,
-                            'issue_id' => $iid,
-                            'comment' => $comment,
-                            'developer_name' => $developer_name['name']
-                        ]
-                    );
+                    $labels = implode(",", $issue['labels']);
+                    $iid = $issue['iid'];
+
+                    Issue::where('issue_id', $iid)->update([
+                        'title' => $issue['title'],
+                        'description' => $issue['description'],
+                        'labels' => $labels,
+                        'user_notes_count' => $issue['user_notes_count'],
+                        'assignee' => $assignees,
+                        'state' => $issue['state']
+                    ]);
+
+                    $notesCh = curl_init($apiUrl.$projectId.'/issues/'.$iid.'/notes');
+                    curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
+                    curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
+                    $notesResponse = curl_exec($notesCh);
+                    curl_close($notesCh);
+                    $issueNotes = json_decode($notesResponse, 1);
+
+
+                    foreach ($issueNotes as $note) {
+                        if ($note == "404 Not Found") {
+                            dump("No notes found for issue ".$iid);
+                        } else {
+                            $comment_id = $note['id'];
+                            $comment = $note['body'];
+                            $developer_name = $note['author'];
+
+                            $gitnote = Gitnote::updateOrCreate(
+                                ['comment_id' => $comment_id],
+
+                                [
+                                    'comment_id' => $comment_id,
+                                    'issue_id' => $iid,
+                                    'comment' => $comment,
+                                    'developer_name' => $developer_name['name']
+                                ]
+                            );
+                        }
+                    }
                 }
             }
         }
