@@ -21,11 +21,8 @@ class IssuesController extends Controller
 
         $issues = Issue::where('user_id', Auth::user()->id)->get();
 
-        // Uncomment this if you just want to return user issue data
-        // return $activeIssues;
-
-        // Return data to a view
-        return view('issue', compact('issues'));
+        // Returns issues created by the logged in user
+        return $issues;
     }
 
     /**
@@ -106,10 +103,7 @@ class IssuesController extends Controller
     {
         $issueNotes = Gitnote::where('issue_id', $id)->get();
 
-        // Uncomment to return data on its own
-        // return $issueNotes;
-
-        // Return notes data to view
-        return view('notes', compact('issueNotes'));
+        // Returns notes on issues created by logged in user
+        return $issueNotes;
     }
 }
