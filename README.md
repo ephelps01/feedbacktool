@@ -1,6 +1,7 @@
 # Read Me
 
-Make sure you have run migrations after install and you have the laravel auth scaffolding generated or this package will not work!
+On install run `php artisan migrate` to migrate tables and if you haven't done so already build auth scaffolding by
+running command `php artisan make:auth`.
 
 ## Config File
 
