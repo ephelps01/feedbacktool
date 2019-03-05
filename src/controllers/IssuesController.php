@@ -17,8 +17,6 @@ class IssuesController extends Controller
      */
     public function index()
     {
-        include __DIR__."/../config.php";
-
         $issues = Issue::where('user_id', Auth::user()->id)->get();
 
         // Returns issues created by the logged in user

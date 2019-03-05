@@ -20,7 +20,7 @@ class Issue extends Model
         include __DIR__."/../config.php";
 
         $headers = ['PRIVATE-TOKEN: '.$accessToken];
-        $ch = curl_init($apiUrl.$projectId.'/issues');
+        $ch = curl_init($apiUrl.'/projects/'.$projectId.'/issues');
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
@@ -28,48 +28,56 @@ class Issue extends Model
         $issues = json_decode($response, 1);
 
         foreach ($issues as $issue) {
+            if ($issue == "404 Not Found") {
+                echo "404, Not Found. There May Be a Problem With Your Config File! ";
+            }
 
-        	$assignees = '';
+            $assignees = '';
 
-        	foreach ($issue['assignees'] as $assignee) {
-        		$assignees .=$assignee['name'];
-        	}
+            foreach ($issue['assignees'] as $assignee) {
+                $assignees .=$assignee['name'];
+            }
 
-        	$labels = implode(",", $issue['labels']);
-        	$iid = $issue['iid'];
+            $labels = implode(",", $issue['labels']);
+            $iid = $issue['iid'];
 
-        	Issue::where('issue_id', $iid)->update([
-				'title' => $issue['title'],
-				'description' => $issue['description'],
-				'labels' => $labels,
-				'user_notes_count' => $issue['user_notes_count'],
-				'assignee' => $assignees,
-				'state' => $issue['state']
-			]);
+            Issue::where('issue_id', $iid)->update([
+                'title' => $issue['title'],
+                'description' => $issue['description'],
+                'labels' => $labels,
+                'user_notes_count' => $issue['user_notes_count'],
+                'assignee' => $assignees,
+                'state' => $issue['state']
+            ]);
 
-	        $notesCh = curl_init($apiUrl.$projectId.'/issues/'.$iid.'/notes');
-	        curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
-	        curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
-	        $notesResponse = curl_exec($notesCh);
-	        curl_close($notesCh);
-	        $issueNotes = json_decode($notesResponse, 1);
+            $notesCh = curl_init($apiUrl.$projectId.'/issues/'.$iid.'/notes');
+            curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
+            $notesResponse = curl_exec($notesCh);
+            curl_close($notesCh);
+            $issueNotes = json_decode($notesResponse, 1);
 
-	        foreach ($issueNotes as $note) {
-	        	$comment_id = $note['id'];
-	        	$comment = $note['body'];
-	        	$developer_name = $note['author'];
 
-				$gitnote = Gitnote::updateOrCreate(
-				    ['comment_id' => $comment_id],
+            foreach ($issueNotes as $note) {
+                if ($note == "404 Not Found") {
+                    dump("No notes found for issue ".$iid);
+                } else {
+                    $comment_id = $note['id'];
+                    $comment = $note['body'];
+                    $developer_name = $note['author'];
 
-				    [
-				    	'comment_id' => $comment_id,
-				    	'issue_id' => $iid,
-				    	'comment' => $comment,
-				    	'developer_name' => $developer_name['name']
-					]
-				);
-	        }
+                    $gitnote = Gitnote::updateOrCreate(
+                        ['comment_id' => $comment_id],
+
+                        [
+                            'comment_id' => $comment_id,
+                            'issue_id' => $iid,
+                            'comment' => $comment,
+                            'developer_name' => $developer_name['name']
+                        ]
+                    );
+                }
+            }
         }
     }
 
@@ -77,28 +85,28 @@ class Issue extends Model
 
     public static function createIssue($gitlabResponse) {
 
-    	$labels = implode(",", $gitlabResponse['labels']);
+        $labels = implode(",", $gitlabResponse['labels']);
 
-    	$issue = new Issue;
+        $issue = new Issue;
 
-    	$issue->issue_id = $gitlabResponse['iid'];
-    	$issue->user_id = Auth::user()->id;
-    	$issue->title = $gitlabResponse['title'];
-    	$issue->description = $gitlabResponse['description'];
-    	$issue->labels = $labels;
-    	$issue->user_notes_count = $gitlabResponse['user_notes_count'];
-    	$issue->state = $gitlabResponse['state'];
+        $issue->issue_id = $gitlabResponse['iid'];
+        $issue->user_id = Auth::user()->id;
+        $issue->title = $gitlabResponse['title'];
+        $issue->description = $gitlabResponse['description'];
+        $issue->labels = $labels;
+        $issue->user_notes_count = $gitlabResponse['user_notes_count'];
+        $issue->state = $gitlabResponse['state'];
 
-    	$issue->save();
-	}
+        $issue->save();
+    }
 
 
 
-	public static function sendToGitlab($request) {
+    public static function sendToGitlab($request) {
 
         include __DIR__."/../config.php";
 
-		$specifiedUser = Auth::user()->$userIdentifier;
+        $specifiedUser = Auth::user()->$userIdentifier;
 
         $post = [
             'title' => $request->title,
@@ -121,11 +129,11 @@ class Issue extends Model
         $gitlabResponse = json_decode($response, true);
 
         Issue::createIssue($gitlabResponse);
-	}
+    }
 
-	public static function getIssueNotes($id) {
+    public static function getIssueNotes($id) {
 
-	}
+    }
 
     public function notes()
     {
