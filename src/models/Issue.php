@@ -28,59 +28,69 @@ class Issue extends Model
         $issues = json_decode($response, 1);
 
         if ($issues == null) {
-            echo "Oops! Have You Setup Your 'config.php' Correctly? ";
+            echo "Error no response from GitLab, is your config.php file setup? ";
             die();
         } else {
             foreach ($issues as $issue) {
                 if ($issue == "404 Not Found") {
-                    echo "404, Not Found. There May Be a Problem With Your Config File! ";
+                    echo "404, GitLab API Not Found. Check the apiUrl in your config.php file. ";
                     die();
-                } else {
-                    $assignees = '';
+                }
 
-                    foreach ($issue['assignees'] as $assignee) {
-                        $assignees .=$assignee['name'];
-                    }
+                if ($issue == "404 Project Not Found") {
+                    echo "404, Project Not Found. Check the projectId in your config.php file. ";
+                    die();
+                }
 
-                    $labels = implode(",", $issue['labels']);
-                    $iid = $issue['iid'];
+                if ($issue == "401 Unauthorized") {
+                    echo "401, Unauthorised. Check your access token. ";
+                    die();
+                }
 
-                    Issue::where('issue_id', $iid)->update([
-                        'title' => $issue['title'],
-                        'description' => $issue['description'],
-                        'labels' => $labels,
-                        'user_notes_count' => $issue['user_notes_count'],
-                        'assignee' => $assignees,
-                        'state' => $issue['state']
-                    ]);
+                $assignees = '';
 
-                    $notesCh = curl_init($apiUrl.'/projects/'.$projectId.'/issues/'.$iid.'/notes');
-                    curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
-                    curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
-                    $notesResponse = curl_exec($notesCh);
-                    curl_close($notesCh);
-                    $issueNotes = json_decode($notesResponse, 1);
+                foreach ($issue['assignees'] as $assignee) {
+                    $assignees .=$assignee['name'];
+                }
+
+                $labels = implode(",", $issue['labels']);
+                $iid = $issue['iid'];
+
+                Issue::where('issue_id', $iid)->update([
+                    'title' => $issue['title'],
+                    'description' => $issue['description'],
+                    'labels' => $labels,
+                    'user_notes_count' => $issue['user_notes_count'],
+                    'assignee' => $assignees,
+                    'state' => $issue['state']
+                ]);
+
+                $notesCh = curl_init($apiUrl.'/projects/'.$projectId.'/issues/'.$iid.'/notes');
+                curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
+                $notesResponse = curl_exec($notesCh);
+                curl_close($notesCh);
+                $issueNotes = json_decode($notesResponse, 1);
 
 
-                    foreach ($issueNotes as $note) {
-                        if ($note == "404 Not Found") {
-                            dump("No notes found for issue ".$iid);
-                        } else {
-                            $comment_id = $note['id'];
-                            $comment = $note['body'];
-                            $developer_name = $note['author'];
+                foreach ($issueNotes as $note) {
+                    if ($note == "404 Not Found") {
+                        dump("No notes found for issue ".$iid);
+                    } else {
+                        $comment_id = $note['id'];
+                        $comment = $note['body'];
+                        $developer_name = $note['author'];
 
-                            $gitnote = Gitnote::updateOrCreate(
-                                ['comment_id' => $comment_id],
+                        $gitnote = Gitnote::updateOrCreate(
+                            ['comment_id' => $comment_id],
 
-                                [
-                                    'comment_id' => $comment_id,
-                                    'issue_id' => $iid,
-                                    'comment' => $comment,
-                                    'developer_name' => $developer_name['name']
-                                ]
-                            );
-                        }
+                            [
+                                'comment_id' => $comment_id,
+                                'issue_id' => $iid,
+                                'comment' => $comment,
+                                'developer_name' => $developer_name['name']
+                            ]
+                        );
                     }
                 }
             }

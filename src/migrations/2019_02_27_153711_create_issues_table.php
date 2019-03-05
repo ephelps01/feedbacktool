@@ -18,7 +18,7 @@ class CreateIssuesTable extends Migration
             $table->integer('issue_id');
             $table->integer('user_id');
             $table->string('title');
-            $table->string('description');
+            $table->longText('description');
             $table->string('labels');
             $table->integer('user_notes_count');
             $table->string('assignee')->default('No One')->nullable();
