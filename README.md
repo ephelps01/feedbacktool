@@ -1,6 +1,6 @@
 # Read Me
 
-Make sure you have run migrations after install and you have the laravel auth scaffolfing generated or this package will not work!
+Make sure you have run migrations after install and you have the laravel auth scaffolding generated or this package will not work!
 
 ## Config File
 
