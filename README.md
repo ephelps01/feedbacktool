@@ -1,5 +1,7 @@
 # Read Me
 
+Make sure you have run migrations after install and you have the laravel auth scaffolfing generated or this package will not work!
+
 ## Config File
 
 The config file is inside of the controllers folder, configure this before using the package as it requires variables
