@@ -54,7 +54,7 @@ class Issue extends Model
                         'state' => $issue['state']
                     ]);
 
-                    $notesCh = curl_init($apiUrl.$projectId.'/issues/'.$iid.'/notes');
+                    $notesCh = curl_init($apiUrl.'/projects/'.$projectId.'/issues/'.$iid.'/notes');
                     curl_setopt($notesCh, CURLOPT_HTTPHEADER, $headers);
                     curl_setopt($notesCh, CURLOPT_RETURNTRANSFER, true);
                     $notesResponse = curl_exec($notesCh);
