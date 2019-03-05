@@ -16,7 +16,7 @@ ________________________________________________________________________________
 
 
 ## Creating an Issue
-What data to pass:
+What data to POST:
 
 The controller accepts the following input names:
 - 'title'
@@ -100,7 +100,7 @@ All three are required or they will return an error.
 
 Make a GET request to this route: /issue
 
-It will return a variable: $issues
+It will return a variable: `$issues` by default.
 In your view you may display the data shown in the (GitLab Response Data) section above ^
 
 
@@ -109,6 +109,6 @@ In your view you may display the data shown in the (GitLab Response Data) sectio
 Make a GET request to this route: /issue/{id}/notes
 Make sure that the issue id is present or the controller will not know what issues notes to get.
 
-The controller will return a variable: $issueNotes by default.
+The controller will return a variable: `$issueNotes` by default.
 
 *To return data on it's own or format it as JSON, see the Issues Controller located: `ecd\feedbacktool\src\controllers\IssuesController.php`*# feedbacktool
